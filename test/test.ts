@@ -13,8 +13,20 @@ const p = new Promise((resolve, reject) => {
 
 p.then((value) => {
   console.log(value)
-  console.log('执行了then')
-}).catch((err) => {
-  console.log(err)
-  console.log('执行了catch')
+  console.log('执行了then1')
 })
+  .then((value) => {
+    console.log(value)
+    console.log('执行了then2')
+  })
+  .catch((err) => {
+    console.log(err)
+    console.log('执行了catch1')
+  })
+  .catch((err) => {
+    console.log(err)
+    console.log('执行了catch2')
+  })
+  .finally()
+
+// Promise.allSettled()
