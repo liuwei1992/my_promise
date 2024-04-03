@@ -1,32 +1,50 @@
 import MyPromise from '../lib/index.js'
 
-const p = new Promise((resolve, reject) => {
+const p = new MyPromise((resolve, reject) => {
   // pending
-  console.log('11111111')
+  // console.log('-----------------')
 
   // fulfilled
-  resolve('resolve value')
+  // resolve('resolve value')
 
   // rejected
-  reject('reject value')
+  reject('reject value---------')
 })
 
-p.then((value) => {
-  console.log(value)
-  console.log('执行了then1')
-})
-  .then((value) => {
+p.then(
+  (value) => {
     console.log(value)
-    console.log('执行了then2')
+    console.log('执行了then1')
+  },
+  (err) => {
+    console.log('执行了then catch', err)
+    throw 'hhhhhhh'
+  },
+)
+  .then((res) => {
+    console.log('then2 res', res)
   })
   .catch((err) => {
     console.log(err)
-    console.log('执行了catch1')
+    console.error('执行了catch1')
   })
-  .catch((err) => {
-    console.log(err)
-    console.log('执行了catch2')
-  })
-  .finally()
 
-// Promise.allSettled()
+// p.then(
+//   (res) => {
+//     console.log('res1', res)
+//     return 'res11111'
+//   },
+//   (err) => {
+//     console.log('err', err)
+//     return 'err11111'
+//   },
+// ).then(
+//   (res) => {
+//     console.log('res2', res)
+//   },
+//   (err) => {
+//     console.log('err2', err)
+//   },
+// )
+
+// Promise.any()

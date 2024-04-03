@@ -6,9 +6,9 @@
   "directories": {
     "lib": "lib"
   },
-  "type": "module",
   "scripts": {
-    "test": "node ./test/index.js"
+    "build": "tsc ./test/test.ts",
+    "start": "node ./test/test.js"
   },
   "author": "",
   "license": "MIT",
@@ -21,5 +21,9 @@
     "prettier-eslint": "^16.3.0",
     "typescript": "^5.4.3",
     "typescript-eslint": "^7.5.0"
+  },
+  "dependencies": {
+    "-": "^0.0.1",
+    "tslib": "^2.6.2"
   }
 }

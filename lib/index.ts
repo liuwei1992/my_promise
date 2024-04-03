@@ -1,4 +1,4 @@
-import type { PromiseFulfilledResult, PromiseRejectedResult } from './types'
+import type { FulfilledResult, RejectedResult } from './types'
 import { Status } from './types'
 
 class MyPromise {
@@ -6,16 +6,15 @@ class MyPromise {
   onrejects: ((reason?: any) => void)[] = []
   onfinallys: (() => void)[] = []
   status: Status = Status.PENDING
-  resolveValue: any = undefined
+  value: any = undefined
+  reason: any = undefined
 
   resolve = (value: any) => {
-    this.resolveValue = value
-    // if (value instanceof MyPromise) {
-    //   // promise的值？？？？ 2）thenable对象
-    // } else
+    this.value = value
     if (this.status === Status.PENDING) {
-      this.status = Status.FULFILLED
       queueMicrotask(() => {
+        if (this.status !== Status.PENDING) return
+        this.status = Status.FULFILLED
         this.onfulfills.forEach((onfulfilled) => {
           onfulfilled(value)
         })
@@ -24,9 +23,14 @@ class MyPromise {
   }
 
   reject = (reason?: any) => {
+    this.reason = reason
     if (this.status === Status.PENDING) {
-      this.status = Status.REJECTED
       queueMicrotask(() => {
+        if (this.status !== Status.PENDING) return
+
+        this.status = Status.REJECTED
+        // console.log('this.onrejects22222', this.onrejects)
+
         this.onrejects.forEach((onrejected) => {
           onrejected(reason)
         })
@@ -40,30 +44,48 @@ class MyPromise {
       reject: (reason?: any) => void,
     ) => void,
   ) {
-    console.log('创建成功！')
-
     // 立即执行
     executor(this.resolve, this.reject)
   }
 
   then(
-    onfulfilled: (value: any) => void = (value) => {
-      return value
-    },
-    onrejected?: (reason?: any) => void,
+    onfulfilled: (value: any) => any = (value) => value,
+    onrejected: (reason?: any) => void = (err) => {
+      throw err
+    }, // 这个是then链式调用，最终公用catch的关键 1 默认throw
   ): MyPromise {
     // 链式调用
     return new MyPromise((resolve, reject) => {
-      this.onfulfills.push(() => {
-        const result = onfulfilled(this.resolveValue)
-        resolve(result)
-      })
+      if (Status.PENDING === this.status) {
+        if (onfulfilled) {
+          // this.onfulfills.push(onfulfilled)
+          this.onfulfills.push(() => {
+            const result = onfulfilled(this.value)
+            resolve(result)
+          })
+        }
 
-      onrejected &&
-        this.onrejects.push(() => {
-          const result = onrejected(this.resolveValue)
-          reject(result)
-        })
+        if (onrejected) {
+          this.onrejects.push(() => {
+            // 这个是then链式调用，最终公用catch的关键 2
+            try {
+              const reason = onrejected(this.reason)
+              resolve(reason)
+            } catch (err) {
+              reject(err)
+            }
+          })
+
+          // console.log('this.onrejects11111', this.onrejects)
+        }
+      } else if (Status.FULFILLED === this.status) {
+        // 已经执行完的 promise 在添加then方法时会立即执行
+        const result = onfulfilled(this.value)
+        resolve(result)
+      } else if (onrejected && Status.REJECTED === this.status) {
+        onrejected(this.reason)
+        resolve(this.reason)
+      }
     })
   }
 
@@ -103,7 +125,7 @@ class MyPromise {
   }
 
   static allSettled(promises: MyPromise[]): MyPromise {
-    const values: (PromiseFulfilledResult | PromiseRejectedResult)[] = []
+    const values: (FulfilledResult | RejectedResult)[] = []
     return new MyPromise((resolve, reject) => {
       promises.forEach((p) => {
         p.then(
@@ -116,6 +138,32 @@ class MyPromise {
         ).finally(() => {
           if (values.length === promises.length) {
             resolve(values)
+          }
+        })
+      })
+    })
+  }
+
+  /**
+   * Creates a Promise that is resolved or rejected when any of the provided Promises are resolved or rejected.
+   */
+  static race(promises: MyPromise[]): MyPromise {
+    return new MyPromise((resolve, reject) => {
+      promises.forEach((p) => {
+        p.then(resolve, reject)
+      })
+    })
+  }
+
+  // 返回第一个resolved结果
+  static any(promises: MyPromise[]): MyPromise {
+    const reasons = []
+    return new MyPromise((resolve, reject) => {
+      promises.forEach((p) => {
+        p.then(resolve, (reason) => {
+          reasons.push(reason)
+          if (reasons.length === promises.length) {
+            reject('All promises were rejected')
           }
         })
       })
