@@ -1,15 +1,15 @@
 import type { FulfilledResult, RejectedResult } from './types'
 import { Status } from './types'
 
-class MyPromise {
+class MyPromise<T = any> {
   onfulfills: ((value: any) => void)[] = []
   onrejects: ((reason?: any) => void)[] = []
   onfinallys: (() => void)[] = []
   status: Status = Status.PENDING
-  value: any = undefined
+  value: T | undefined = undefined
   reason: any = undefined
 
-  resolve = (value: any) => {
+  resolve = (value: T) => {
     this.value = value
     if (this.status === Status.PENDING) {
       queueMicrotask(() => {
@@ -40,7 +40,7 @@ class MyPromise {
 
   constructor(
     executor: (
-      resolve: (value: unknown) => void,
+      resolve: (value: T) => any,
       reject: (reason?: any) => void,
     ) => void,
   ) {
@@ -49,7 +49,7 @@ class MyPromise {
   }
 
   then(
-    onfulfilled: (value: any) => any = (value) => value,
+    onfulfilled: (value: T) => any = (value) => value,
     onrejected: (reason?: any) => void = (err) => {
       throw err
     }, // 这个是then链式调用，最终公用catch的关键 1 默认throw
@@ -60,7 +60,7 @@ class MyPromise {
         if (onfulfilled) {
           // this.onfulfills.push(onfulfilled)
           this.onfulfills.push(() => {
-            const result = onfulfilled(this.value)
+            const result = onfulfilled(this.value!)
             resolve(result)
           })
         }
@@ -80,7 +80,7 @@ class MyPromise {
         }
       } else if (Status.FULFILLED === this.status) {
         // 已经执行完的 promise 在添加then方法时会立即执行
-        const result = onfulfilled(this.value)
+        const result = onfulfilled(this.value!)
         resolve(result)
       } else if (onrejected && Status.REJECTED === this.status) {
         onrejected(this.reason)
@@ -97,7 +97,7 @@ class MyPromise {
     return this.then(onfinally, onfinally)
   }
 
-  static resolve(value: any) {
+  static resolve<T = any>(value: T) {
     return new MyPromise((resolve) => resolve(value))
   }
 
