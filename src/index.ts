@@ -1,14 +1,11 @@
-import MyPromise from '../lib/index.js'
+import MyPromise from './my-promise.ts'
 
 const p = new MyPromise((resolve, reject) => {
-  // pending
-  // console.log('-----------------')
-
   // fulfilled
-  // resolve('resolve value')
+  resolve('hello resolve')
 
   // rejected
-  reject('reject value---------')
+  // reject('reject value---------')
 })
 
 p.then(

@@ -9,6 +9,5 @@
   "files.associations": {
     "*.ts": "typescript"
   },
-  "emmet.triggerExpansionOnTab": true,
-  "typescript.tsdk": "node_modules/typescript/lib"
+  "emmet.triggerExpansionOnTab": true
 }

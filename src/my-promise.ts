@@ -157,13 +157,13 @@ class MyPromise<T = any> {
 
   // 返回第一个resolved结果
   static any(promises: MyPromise[]): MyPromise {
-    const reasons = []
+    const reasons: any[] = []
     return new MyPromise((resolve, reject) => {
       promises.forEach((p) => {
         p.then(resolve, (reason) => {
           reasons.push(reason)
           if (reasons.length === promises.length) {
-            reject('All promises were rejected')
+            reject(reasons)
           }
         })
       })

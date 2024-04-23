@@ -2,28 +2,13 @@
   "name": "my_promise",
   "version": "1.0.0",
   "description": "",
-  "main": "lib/index.js",
-  "directories": {
-    "lib": "lib"
-  },
   "scripts": {
-    "build": "tsc ./test/test.ts",
-    "start": "node ./test/test.js"
+    "build": "tsup",
+    "dev": "tsup --watch"
   },
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@tsconfig/recommended": "^1.0.5",
-    "@typescript-eslint/eslint-plugin": "^7.5.0",
-    "@typescript-eslint/parser": "^7.5.0",
-    "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
-    "prettier-eslint": "^16.3.0",
-    "typescript": "^5.4.3",
-    "typescript-eslint": "^7.5.0"
-  },
-  "dependencies": {
-    "-": "^0.0.1",
-    "tslib": "^2.6.2"
+    "tsup": "^8.0.2"
   }
 }
